@@ -36,6 +36,7 @@ dev = [
   "mypy>=1.6",
   "pytest>=7.0",
   "pytest-asyncio>=0.21",
+  "pytest-cov>=4.1",
   "respx>=0.20",
   "ruff>=0.1.5",
   "coverage[toml]>=7.0",
