@@ -1,5 +1,8 @@
 # Mailrify Python SDK
 
+[![CI](https://github.com/Mailrify/mailrify-python/actions/workflows/ci.yml/badge.svg)](https://github.com/Mailrify/mailrify-python/actions/workflows/ci.yml)
+[![Release](https://github.com/Mailrify/mailrify-python/actions/workflows/release.yml/badge.svg)](https://github.com/Mailrify/mailrify-python/actions/workflows/release.yml)
+
 Official Python client for the [Mailrify](https://mailrify.com) transactional and marketing email API.
 
 ## Installation
