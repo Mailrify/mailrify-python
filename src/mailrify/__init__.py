@@ -69,7 +69,7 @@ __all__ = [
     "__version__",
 ]
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 api_key: str | None = None
 _default_client: Client | None = None
