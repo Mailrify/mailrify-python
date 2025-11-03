@@ -7,13 +7,11 @@ Official Python client for the [Mailrify](https://mailrify.com) transactional an
 
 ## Installation
 
-The package is not published yet. Clone the repository and install in editable mode:
+Install from PyPI (Python 3.9+):
 
 ```bash
-pip install -e .
+pip install mailrify
 ```
-
-Python 3.9 or higher is required.
 
 ## Quickstart (Sync)
 
