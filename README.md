@@ -2,8 +2,6 @@
 
 Official Python client for the [Mailrify](https://mailrify.com) transactional and marketing email API.
 
-> **Status:** pre-alpha. The SDK is under active development and not yet published on PyPI.
-
 ## Installation
 
 The package is not published yet. Clone the repository and install in editable mode:
