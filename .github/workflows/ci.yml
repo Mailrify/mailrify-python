@@ -58,3 +58,21 @@ jobs:
       - run: pip install .[dev]
       - run: python -m build
       - run: twine check dist/*
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: [tests]
+    if: ${{ secrets.MAILRIFY_API_KEY != '' && secrets.MAILRIFY_INTEGRATION_FROM != '' && secrets.MAILRIFY_INTEGRATION_TO != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install .[dev]
+      - name: Run integration tests
+        env:
+          MAILRIFY_API_KEY: ${{ secrets.MAILRIFY_API_KEY }}
+          MAILRIFY_INTEGRATION_FROM: ${{ secrets.MAILRIFY_INTEGRATION_FROM }}
+          MAILRIFY_INTEGRATION_TO: ${{ secrets.MAILRIFY_INTEGRATION_TO }}
+          MAILRIFY_BASE_URL: ${{ secrets.MAILRIFY_BASE_URL }}
+        run: pytest -m integration
