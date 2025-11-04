@@ -20,9 +20,7 @@ from typing import Optional
 
 import httpx
 
-DEFAULT_SPEC_URL = (
-    "https://raw.githubusercontent.com/Mailrify/mailrify-openapi/main/openapi.yaml"
-)
+DEFAULT_SPEC_URL = "https://raw.githubusercontent.com/Mailrify/mailrify-openapi/main/openapi.yaml"
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_PATH = ROOT / "openapi.yaml"
 SPEC_META_PATH = ROOT / "spec-version.json"
@@ -55,6 +53,8 @@ def generate_models(spec_path: Path, output_path: Path, *, python_version: str) 
         "openapi",
         "--output",
         str(output_path),
+        "--base-class",
+        "mailrify.models._base.MailrifyModel",
         "--output-model-type",
         "pydantic_v2.BaseModel",
         "--target-python-version",

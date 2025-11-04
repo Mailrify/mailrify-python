@@ -22,6 +22,7 @@ jobs:
       - run: black --check src tests
       - run: mypy src
       - run: pytest -m "not integration"
+      - run: rm -rf dist build
       - run: python -m build
       - run: twine check dist/*
       - name: Publish to PyPI (Trusted Publishing)

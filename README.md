@@ -13,21 +13,38 @@ Install from PyPI (Python 3.9+):
 pip install mailrify
 ```
 
+> **Tip:** Ensure VS Code (or your editor) is using the same interpreter or virtual environment where you installed `mailrify`, otherwise Pylance may report missing imports.
+
 ## Quickstart (Sync)
 
 ```python
 import mailrify
+from mailrify.models import SendEmailRequest
 
 mailrify.api_key = "YOUR_API_KEY"
 
+# Method 1: Provide a plain dict; the SDK will shape it into the expected request behind the scenes.
 params: mailrify.Emails.SendParams = {
-    "to": ["customer@example.com"],
-    "from": "you@yourdomain.com",
-    "subject": "Welcome!",
-    "text": "Hello from Mailrify!",
+    "from": "Your app <no-reply@yourdomain.com>",
+    "to": ["client@example.com"],
+    "subject": "Welcome to Mailrify 🚀",
+    "html": "<p>It works! 👋</p>",
+    "text": "It works!"
 }
 
 email: mailrify.Emails.SendResponse = mailrify.Emails.send(params)
+print(email)
+
+# Method 2: Build the helper request object explicitly for better editor assistance.
+emailData = SendEmailRequest(
+    from_= "Your app <no-reply@yourdomain.com>",
+    to=["client@example.com"],
+    subject="Welcome to Mailrify 🚀",
+    html="<p>It works! 👋</p>",
+    text="It works!"
+)
+
+email = mailrify.Emails.send(emailData)
 print(email)
 ```
 
@@ -42,13 +59,14 @@ async def main() -> None:
     async with mailrify.AsyncClient(api_key="YOUR_API_KEY") as client:
         email = await client.emails.send(
             {
-                "to": ["customer@example.com"],
-                "from": "you@yourdomain.com",
-                "subject": "Welcome!",
-                "html": "<strong>Hello from Mailrify!</strong>",
+                "from": "Your app <no-reply@yourdomain.com>",
+                "to": ["client@example.com"],
+                "subject": "Welcome to Mailrify 🚀",
+                "html": "<p>It works! 👋</p>",
+                "text": "It works!"
             }
         )
-        print(email.email_id)
+        print(email.emailId)
 
 
 asyncio.run(main())

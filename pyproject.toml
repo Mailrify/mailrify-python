@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mailrify"
-version = "0.0.3"
+version = "0.0.4"
 description = "Official Python SDK for Mailrify"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -27,6 +27,7 @@ classifiers = [
 dependencies = [
   "httpx>=0.25,<1.0",
   "pydantic>=2,<3",
+  "typing_extensions>=4.7",
 ]
 
 [project.optional-dependencies]
@@ -50,18 +51,33 @@ Repository = "https://github.com/Mailrify/mailrify-python"
 Issues = "https://github.com/Mailrify/mailrify-python/issues"
 Changelog = "https://github.com/Mailrify/mailrify-python/blob/main/CHANGELOG.md"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/mailrify"]
-
-[tool.hatch.build.targets.sdist]
+[tool.hatch.build]
 include = [
-  "src/mailrify",
+  "src/mailrify/**",
   "README.md",
   "CHANGELOG.md",
   "LICENSE",
   "CONTRIBUTING.md",
   "SECURITY.md",
-  "scripts",
+  "scripts/**",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mailrify"]
+artifacts = [
+  "src/mailrify/py.typed",
+  "src/mailrify/__init__.pyi",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/mailrify/**",
+  "README.md",
+  "CHANGELOG.md",
+  "LICENSE",
+  "CONTRIBUTING.md",
+  "SECURITY.md",
+  "scripts/**",
 ]
 
 [tool.black]

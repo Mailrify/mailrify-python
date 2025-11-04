@@ -7,7 +7,12 @@ import respx
 from httpx import Response
 
 from mailrify.client import Client
-from mailrify.models import BatchEmailResponse, CancelScheduleResponse, ListEmailsResponse
+from mailrify.models import (
+    BatchEmailResponse,
+    CancelScheduleResponse,
+    ListEmailsResponse,
+    SendEmailRequest,
+)
 
 BASE_URL = "https://app.mailrify.com/api"
 
@@ -144,3 +149,14 @@ def test_batch_send_email(client: Client) -> None:
     assert response.data[0].emailId == "email_1"
     batch_payload = json.loads(route.calls[0].request.content.decode())
     assert batch_payload[0]["from"] == "sender@example.com"
+
+
+def test_send_email_request_accepts_python_safe_field_names() -> None:
+    request = SendEmailRequest(
+        from_="sender@example.com",
+        to=["user@example.com"],
+        subject="Subject",
+        text="Hello",
+    )
+    payload = request.model_dump(by_alias=True)
+    assert payload["from"] == "sender@example.com"

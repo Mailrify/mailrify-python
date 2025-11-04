@@ -10,6 +10,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any, ClassVar
 
+from typing_extensions import TypeAlias
+
 from .client import AsyncClient, Client
 from .models import (
     BatchEmailRequest,
@@ -69,7 +71,7 @@ __all__ = [
     "__version__",
 ]
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 
 api_key: str | None = None
 _default_client: Client | None = None
@@ -103,25 +105,35 @@ def get_default_client() -> Client:
     return _default_client
 
 
-class _EmailsNamespace:
-    SendParams: ClassVar[type[SendEmailRequest]] = SendEmailRequest
-    SendResponse: ClassVar[type[SendEmailResponse]] = SendEmailResponse
-    BatchSendParams: ClassVar[type[BatchEmailRequest]] = BatchEmailRequest
-    BatchSendResponse: ClassVar[type[BatchEmailResponse]] = BatchEmailResponse
-    ListResponse: ClassVar[type[ListEmailsResponse]] = ListEmailsResponse
-    UpdateScheduleParams: ClassVar[type[UpdateScheduleRequest]] = UpdateScheduleRequest
-    UpdateScheduleResponse: ClassVar[type[UpdateScheduleResponseModel]] = (
-        UpdateScheduleResponseModel
-    )
+SendParams: TypeAlias = SendEmailRequest
+SendResponse: TypeAlias = SendEmailResponse
+BatchSendParams: TypeAlias = BatchEmailRequest
+BatchSendResponse: TypeAlias = BatchEmailResponse
+ListResponse: TypeAlias = ListEmailsResponse
+UpdateScheduleParams: TypeAlias = UpdateScheduleRequest
+UpdateScheduleResponse: TypeAlias = UpdateScheduleResponseModel
+
+
+class Emails:
+    SendParams: TypeAlias = SendEmailRequest
+    SendResponse: TypeAlias = SendEmailResponse
+    BatchSendParams: TypeAlias = BatchEmailRequest
+    BatchSendResponse: TypeAlias = BatchEmailResponse
+    ListResponse: TypeAlias = ListEmailsResponse
+    UpdateScheduleParams: TypeAlias = UpdateScheduleRequest
+    UpdateScheduleResponse: TypeAlias = UpdateScheduleResponseModel
     Email: ClassVar[type[EmailModel]] = EmailModel
     CancelResponse: ClassVar[type[CancelScheduleResponse]] = CancelScheduleResponse
 
-    def send(self, params: SendEmailRequest | dict[str, Any]) -> SendEmailResponse:
+    @staticmethod
+    def send(params: SendEmailRequest | dict[str, Any]) -> SendEmailResponse:
         return get_default_client().emails.send(params)
 
-    def batch_send(self, params: BatchEmailRequest | list[dict[str, Any]]) -> BatchEmailResponse:
+    @staticmethod
+    def batch_send(params: BatchEmailRequest | list[dict[str, Any]]) -> BatchEmailResponse:
         return get_default_client().emails.batch_send(params)
 
+    @staticmethod
     def list(
         self,
         *,
@@ -139,67 +151,80 @@ class _EmailsNamespace:
             domain_id=domain_id,
         )
 
-    def get(self, email_id: str) -> EmailModel:
+    @staticmethod
+    def get(email_id: str) -> EmailModel:
         return get_default_client().emails.get(email_id)
 
+    @staticmethod
     def update_schedule(
-        self, email_id: str, params: UpdateScheduleRequest | dict[str, Any]
+        email_id: str, params: UpdateScheduleRequest | dict[str, Any]
     ) -> UpdateScheduleResponseModel:
         return get_default_client().emails.update_schedule(email_id, params)
 
-    def cancel(self, email_id: str) -> CancelScheduleResponse:
+    @staticmethod
+    def cancel(email_id: str) -> CancelScheduleResponse:
         return get_default_client().emails.cancel(email_id)
 
 
-class _DomainsNamespace:
+class Domains:
     Domain: ClassVar[type[DomainModel]] = DomainModel
     CreateParams: ClassVar[type[CreateDomainRequest]] = CreateDomainRequest
     CreateResponse: ClassVar[type[CreateDomainResponse]] = CreateDomainResponse
     DeleteResponse: ClassVar[type[DeleteDomainResponse]] = DeleteDomainResponse
     VerifyResponse: ClassVar[type[VerifyDomainResponse]] = VerifyDomainResponse
 
-    def list(self) -> list[DomainModel]:
+    @staticmethod
+    def list() -> list[DomainModel]:
         return get_default_client().domains.list()
 
-    def create(self, params: CreateDomainRequest | dict[str, Any]) -> CreateDomainResponse:
+    @staticmethod
+    def create(params: CreateDomainRequest | dict[str, Any]) -> CreateDomainResponse:
         return get_default_client().domains.create(params)
 
-    def get(self, domain_id: int | float) -> DomainModel:
+    @staticmethod
+    def get(domain_id: int | float) -> DomainModel:
         return get_default_client().domains.get(domain_id)
 
-    def delete(self, domain_id: int | float) -> DeleteDomainResponse:
+    @staticmethod
+    def delete(domain_id: int | float) -> DeleteDomainResponse:
         return get_default_client().domains.delete(domain_id)
 
-    def verify(self, domain_id: int | float) -> VerifyDomainResponse:
+    @staticmethod
+    def verify(domain_id: int | float) -> VerifyDomainResponse:
         return get_default_client().domains.verify(domain_id)
 
 
-class _CampaignsNamespace:
+class Campaigns:
     Campaign: ClassVar[type[CampaignModel]] = CampaignModel
     CreateParams: ClassVar[type[CreateCampaignRequest]] = CreateCampaignRequest
     ScheduleParams: ClassVar[type[ScheduleCampaignRequest]] = ScheduleCampaignRequest
     ScheduleResponse: ClassVar[type[ScheduleCampaignResponse]] = ScheduleCampaignResponse
     ActionResponse: ClassVar[type[SuccessResponse]] = SuccessResponse
 
-    def create(self, params: CreateCampaignRequest | dict[str, Any]) -> CampaignModel:
+    @staticmethod
+    def create(params: CreateCampaignRequest | dict[str, Any]) -> CampaignModel:
         return get_default_client().campaigns.create(params)
 
-    def get(self, campaign_id: str) -> CampaignModel:
+    @staticmethod
+    def get(campaign_id: str) -> CampaignModel:
         return get_default_client().campaigns.get(campaign_id)
 
+    @staticmethod
     def schedule(
-        self, campaign_id: str, params: ScheduleCampaignRequest | dict[str, Any]
+        campaign_id: str, params: ScheduleCampaignRequest | dict[str, Any]
     ) -> ScheduleCampaignResponse:
         return get_default_client().campaigns.schedule(campaign_id, params)
 
-    def pause(self, campaign_id: str) -> SuccessResponse:
+    @staticmethod
+    def pause(campaign_id: str) -> SuccessResponse:
         return get_default_client().campaigns.pause(campaign_id)
 
-    def resume(self, campaign_id: str) -> SuccessResponse:
+    @staticmethod
+    def resume(campaign_id: str) -> SuccessResponse:
         return get_default_client().campaigns.resume(campaign_id)
 
 
-class _ContactsNamespace:
+class Contacts:
     Contact: ClassVar[type[ContactModel]] = ContactModel
     CreateParams: ClassVar[type[CreateContactRequest]] = CreateContactRequest
     CreateResponse: ClassVar[type[CreateContactResponse]] = CreateContactResponse
@@ -209,8 +234,8 @@ class _ContactsNamespace:
     UpsertResponse: ClassVar[type[UpsertContactResponse]] = UpsertContactResponse
     DeleteResponse: ClassVar[type[DeleteContactResponse]] = DeleteContactResponse
 
+    @staticmethod
     def list(
-        self,
         contact_book_id: str,
         *,
         emails: str | list[str] | None = None,
@@ -226,39 +251,38 @@ class _ContactsNamespace:
             limit=limit,
         )
 
+    @staticmethod
     def create(
-        self, contact_book_id: str, params: CreateContactRequest | dict[str, Any]
+        contact_book_id: str, params: CreateContactRequest | dict[str, Any]
     ) -> CreateContactResponse:
         return get_default_client().contacts.create(contact_book_id, params)
 
-    def get(self, contact_book_id: str, contact_id: str) -> ContactModel:
+    @staticmethod
+    def get(contact_book_id: str, contact_id: str) -> ContactModel:
         return get_default_client().contacts.get(contact_book_id, contact_id)
 
+    @staticmethod
     def upsert(
-        self,
         contact_book_id: str,
         contact_id: str,
         params: UpsertContactRequest | dict[str, Any],
     ) -> UpsertContactResponse:
         return get_default_client().contacts.upsert(contact_book_id, contact_id, params)
 
+    @staticmethod
     def update(
-        self,
         contact_book_id: str,
         contact_id: str,
         params: UpdateContactRequest | dict[str, Any],
     ) -> UpdateContactResponse:
         return get_default_client().contacts.update(contact_book_id, contact_id, params)
 
-    def delete(self, contact_book_id: str, contact_id: str) -> DeleteContactResponse:
+    @staticmethod
+    def delete(contact_book_id: str, contact_id: str) -> DeleteContactResponse:
         return get_default_client().contacts.delete(contact_book_id, contact_id)
 
 
-Emails = _EmailsNamespace()
-Domains = _DomainsNamespace()
-Campaigns = _CampaignsNamespace()
-Contacts = _ContactsNamespace()
-emails = Emails
-domains = Domains
-campaigns = Campaigns
-contacts = Contacts
+emails = Emails()
+domains = Domains()
+campaigns = Campaigns()
+contacts = Contacts()

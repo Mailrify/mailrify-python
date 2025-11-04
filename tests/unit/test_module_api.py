@@ -36,10 +36,10 @@ def test_module_send_uses_default_client() -> None:
 
 
 def test_module_aliases() -> None:
-    assert mailrify.emails is mailrify.Emails
-    assert mailrify.domains is mailrify.Domains
-    assert mailrify.campaigns is mailrify.Campaigns
-    assert mailrify.contacts is mailrify.Contacts
+    assert isinstance(mailrify.emails, mailrify.Emails)
+    assert isinstance(mailrify.domains, mailrify.Domains)
+    assert isinstance(mailrify.campaigns, mailrify.Campaigns)
+    assert isinstance(mailrify.contacts, mailrify.Contacts)
 
 
 def test_module_requires_api_key() -> None:
