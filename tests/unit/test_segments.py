@@ -16,6 +16,7 @@ def parse_request_json(route: respx.Route) -> dict[str, object]:
 
 SEGMENT_PAYLOAD = {
     "id": "seg_1",
+    "type": "DYNAMIC",
     "name": "Premium Users",
     "description": "Premium",
     "condition": {
@@ -52,6 +53,7 @@ def test_list_segments() -> None:
 
     assert len(segments) == 1
     assert segments[0].id == "seg_1"
+    assert segments[0].type == "DYNAMIC"
     client.close()
 
 

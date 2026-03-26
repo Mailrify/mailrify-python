@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased]
+
+### ⚠ BREAKING CHANGES
+
+* Align list response shapes with OpenAPI: `contacts.list()` now returns records in `page.data` (not `page.contacts`).
+* `campaigns.send()` now returns a typed `SendCampaignResult` with `success`, `data`, and `message`.
+
+### Bug Fixes
+
+* Match `GET /contacts` response parsing to `{ data, cursor, hasMore, total }`.
+* Add Templates resource and support `GET /templates` pagination shape `{ data, total, page, pageSize, totalPages }`.
+* Update `Contact`, `Template`, and `Segment` models to current OpenAPI schema fields and nullability.
+
 ## [2.0.0](https://github.com/MailGlyph/mailglyph-python/compare/v1.0.1...v2.0.0) (2026-03-09)
 
 

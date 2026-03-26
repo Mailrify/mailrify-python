@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..http_client import HttpClient
-from ..models import Campaign, CampaignsPage, FilterCondition
+from ..models import Campaign, CampaignsPage, FilterCondition, SendCampaignResult
 from ._utils import compact_dict, unwrap_data
 
 
@@ -99,14 +99,12 @@ class CampaignsResource:
         response = self._http_client.request("PUT", f"/campaigns/{campaign_id}", json_body=payload)
         return Campaign.model_validate(unwrap_data(response))
 
-    def send(self, campaign_id: str, *, scheduled_for: str | None = None) -> dict[str, Any] | None:
+    def send(self, campaign_id: str, *, scheduled_for: str | None = None) -> SendCampaignResult:
         payload = compact_dict({"scheduledFor": scheduled_for})
         response = self._http_client.request(
             "POST", f"/campaigns/{campaign_id}/send", json_body=payload
         )
-        if isinstance(response, dict):
-            return response
-        return None
+        return SendCampaignResult.model_validate(response)
 
     def cancel(self, campaign_id: str) -> Campaign:
         response = self._http_client.request("POST", f"/campaigns/{campaign_id}/cancel")
@@ -218,16 +216,14 @@ class AsyncCampaignsResource:
 
     async def send(
         self, campaign_id: str, *, scheduled_for: str | None = None
-    ) -> dict[str, Any] | None:
+    ) -> SendCampaignResult:
         payload = compact_dict({"scheduledFor": scheduled_for})
         response = await self._http_client.arequest(
             "POST",
             f"/campaigns/{campaign_id}/send",
             json_body=payload,
         )
-        if isinstance(response, dict):
-            return response
-        return None
+        return SendCampaignResult.model_validate(response)
 
     async def cancel(self, campaign_id: str) -> Campaign:
         response = await self._http_client.arequest("POST", f"/campaigns/{campaign_id}/cancel")

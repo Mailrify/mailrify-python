@@ -19,6 +19,9 @@ CONTACT_PAYLOAD = {
     "email": "user@example.com",
     "subscribed": True,
     "data": {"plan": "premium"},
+    "status": "ACTIVE",
+    "expiresAt": None,
+    "projectId": "proj_1",
     "createdAt": "2026-01-01T00:00:00Z",
     "updatedAt": "2026-01-02T00:00:00Z",
 }
@@ -30,7 +33,7 @@ def test_list_paginated_with_cursor() -> None:
     route = respx.get("https://api.mailglyph.com/contacts").mock(
         return_value=Response(
             200,
-            json={"contacts": [CONTACT_PAYLOAD], "cursor": "next_1", "hasMore": True, "total": 10},
+            json={"data": [CONTACT_PAYLOAD], "cursor": "next_1", "hasMore": True, "total": 10},
         )
     )
 
@@ -46,9 +49,7 @@ def test_list_paginated_with_cursor() -> None:
 def test_list_with_filters() -> None:
     client = MailGlyph("sk_test")
     route = respx.get("https://api.mailglyph.com/contacts").mock(
-        return_value=Response(
-            200, json={"contacts": [], "cursor": None, "hasMore": False, "total": 0}
-        )
+        return_value=Response(200, json={"data": [], "cursor": None, "hasMore": False, "total": 0})
     )
 
     client.contacts.list(subscribed=True, search="user")
@@ -69,6 +70,8 @@ def test_get_single_contact() -> None:
     contact = client.contacts.get("ct_1")
 
     assert contact.id == "ct_1"
+    assert contact.status == "ACTIVE"
+    assert contact.project_id == "proj_1"
     client.close()
 
 
@@ -138,6 +141,7 @@ def test_update_custom_data() -> None:
 
     updated = client.contacts.update("ct_1", data={"plan": "enterprise"})
 
+    assert updated.data is not None
     assert updated.data["plan"] == "enterprise"
     request_payload = parse_request_json(route)
     assert isinstance(request_payload["data"], dict)
@@ -172,7 +176,7 @@ def test_count_uses_total() -> None:
     client = MailGlyph("sk_test")
     respx.get("https://api.mailglyph.com/contacts").mock(
         return_value=Response(
-            200, json={"contacts": [CONTACT_PAYLOAD], "cursor": None, "hasMore": False, "total": 42}
+            200, json={"data": [CONTACT_PAYLOAD], "cursor": None, "hasMore": False, "total": 42}
         )
     )
 
@@ -187,7 +191,7 @@ def test_count_uses_total() -> None:
 async def test_async_contacts_list() -> None:
     respx.get("https://api.mailglyph.com/contacts").mock(
         return_value=Response(
-            200, json={"contacts": [CONTACT_PAYLOAD], "cursor": None, "hasMore": False, "total": 1}
+            200, json={"data": [CONTACT_PAYLOAD], "cursor": None, "hasMore": False, "total": 1}
         )
     )
 
@@ -195,3 +199,16 @@ async def test_async_contacts_list() -> None:
         page = await client.contacts.list(limit=1)
 
     assert page.total == 1
+
+
+@respx.mock
+def test_contact_data_can_be_null() -> None:
+    client = MailGlyph("sk_test")
+    respx.get("https://api.mailglyph.com/contacts/ct_1").mock(
+        return_value=Response(200, json={**CONTACT_PAYLOAD, "data": None})
+    )
+
+    contact = client.contacts.get("ct_1")
+
+    assert contact.data is None
+    client.close()

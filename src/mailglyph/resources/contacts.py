@@ -63,7 +63,7 @@ class ContactsResource:
         page = self.list(limit=1, subscribed=subscribed, search=search)
         if page.total is not None:
             return page.total
-        return len(page.contacts)
+        return len(page.data)
 
 
 class AsyncContactsResource:
@@ -126,4 +126,4 @@ class AsyncContactsResource:
         page = await self.list(limit=1, subscribed=subscribed, search=search)
         if page.total is not None:
             return page.total
-        return len(page.contacts)
+        return len(page.data)

@@ -55,14 +55,34 @@ class Contact(MailGlyphModel):
     id: str
     email: str
     subscribed: bool
-    data: dict[str, Any] = Field(default_factory=dict)
+    data: dict[str, Any] | None = None
+    status: str | None = None
+    expires_at: str | None = Field(default=None, alias="expiresAt")
+    project_id: str | None = Field(default=None, alias="projectId")
     created_at: str | None = Field(default=None, alias="createdAt")
     updated_at: str | None = Field(default=None, alias="updatedAt")
     meta: ContactMeta | None = Field(default=None, alias="_meta")
 
 
+class Template(MailGlyphModel):
+    id: str
+    name: str
+    description: str | None = None
+    subject: str
+    body: str
+    text: str | None = None
+    from_email: str = Field(alias="from")
+    from_name: str | None = Field(default=None, alias="fromName")
+    reply_to: str | None = Field(default=None, alias="replyTo")
+    type: str
+    project_id: str | None = Field(default=None, alias="projectId")
+    created_at: str | None = Field(default=None, alias="createdAt")
+    updated_at: str | None = Field(default=None, alias="updatedAt")
+
+
 class Segment(MailGlyphModel):
     id: str
+    type: str | None = None
     name: str | None = None
     description: str | None = None
     condition: FilterCondition | None = None
@@ -125,7 +145,7 @@ class Campaign(MailGlyphModel):
 
 
 class ContactsPage(MailGlyphModel):
-    contacts: list[Contact] = Field(default_factory=list)
+    data: list[Contact] = Field(default_factory=list)
     cursor: str | None = None
     has_more: bool = Field(default=False, alias="hasMore")
     total: int | None = None
@@ -149,6 +169,20 @@ class SegmentContactsPage(MailGlyphModel):
     page: int | None = None
     page_size: int | None = Field(default=None, alias="pageSize")
     total_pages: int | None = Field(default=None, alias="totalPages")
+
+
+class TemplatesPage(MailGlyphModel):
+    data: list[Template] = Field(default_factory=list)
+    total: int | None = None
+    page: int | None = None
+    page_size: int | None = Field(default=None, alias="pageSize")
+    total_pages: int | None = Field(default=None, alias="totalPages")
+
+
+class SendCampaignResult(MailGlyphModel):
+    success: bool
+    data: Campaign
+    message: str
 
 
 class StaticSegmentMembersAddResult(MailGlyphModel):

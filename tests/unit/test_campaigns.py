@@ -175,12 +175,17 @@ def test_update_partial_campaign() -> None:
 def test_send_campaign_immediate() -> None:
     client = MailGlyph("sk_test")
     route = respx.post("https://api.mailglyph.com/campaigns/cmp_1/send").mock(
-        return_value=Response(200)
+        return_value=Response(
+            200,
+            json={"success": True, "data": CAMPAIGN_DATA, "message": "Campaign sending started"},
+        )
     )
 
     result = client.campaigns.send("cmp_1")
 
-    assert result is None
+    assert result.success is True
+    assert result.data.id == "cmp_1"
+    assert result.message == "Campaign sending started"
     assert route.calls.last.request.content in (b"{}", b"")
     client.close()
 
@@ -189,11 +194,14 @@ def test_send_campaign_immediate() -> None:
 def test_send_campaign_scheduled() -> None:
     client = MailGlyph("sk_test")
     route = respx.post("https://api.mailglyph.com/campaigns/cmp_1/send").mock(
-        return_value=Response(200)
+        return_value=Response(
+            200, json={"success": True, "data": CAMPAIGN_DATA, "message": "Campaign scheduled"}
+        )
     )
 
-    client.campaigns.send("cmp_1", scheduled_for="2026-03-01T10:00:00Z")
+    result = client.campaigns.send("cmp_1", scheduled_for="2026-03-01T10:00:00Z")
 
+    assert result.message == "Campaign scheduled"
     assert parse_request_json(route)["scheduledFor"] == "2026-03-01T10:00:00Z"
     client.close()
 
@@ -296,3 +304,19 @@ async def test_async_campaign_create() -> None:
         )
 
     assert campaign.id == "cmp_1"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_async_campaign_send_returns_typed_result() -> None:
+    respx.post("https://api.mailglyph.com/campaigns/cmp_1/send").mock(
+        return_value=Response(
+            200, json={"success": True, "data": CAMPAIGN_DATA, "message": "Campaign scheduled"}
+        )
+    )
+
+    async with AsyncMailGlyph("sk_test") as client:
+        result = await client.campaigns.send("cmp_1", scheduled_for="2026-03-01T10:00:00Z")
+
+    assert result.success is True
+    assert result.data.id == "cmp_1"
