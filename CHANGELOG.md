@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/MailGlyph/mailglyph-python/compare/v2.0.0...v2.1.0) (2026-03-26)
+
+
+### Features
+
+* add Templates resource and update OpenAPI spec with enhanced schemas for Contacts, Templates, and Campaigns ([fd8d717](https://github.com/MailGlyph/mailglyph-python/commit/fd8d717ea47be122cff4ddc9294acaf7e1baac05))
+
 ## [Unreleased]
 
 ### ⚠ BREAKING CHANGES
