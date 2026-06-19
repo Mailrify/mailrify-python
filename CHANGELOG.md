@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/MailGlyph/mailglyph-python/compare/v2.1.0...v2.2.0) (2026-06-19)
+
+
+### Features
+
+* Email validation ([cd7b23a](https://github.com/MailGlyph/mailglyph-python/commit/cd7b23a8c51905ff22871930c1b110f4fafb715c))
+
 ## [2.1.0](https://github.com/MailGlyph/mailglyph-python/compare/v2.0.0...v2.1.0) (2026-03-26)
 
 
