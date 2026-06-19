@@ -8,8 +8,11 @@ from .exceptions import (
     ValidationError,
 )
 from .models import (
+    BulkEmailValidationJob,
+    BulkEmailValidationJobsPage,
     Campaign,
     Contact,
+    DeleteBulkEmailValidationResult,
     FilterCondition,
     FilterGroup,
     Segment,
@@ -20,6 +23,9 @@ from .models import (
     StaticSegmentMembersRemoveResult,
     Template,
     TrackEventResult,
+    VerificationCreditLedgerEntry,
+    VerificationCreditLedgerPage,
+    VerificationCreditSummary,
     VerifyEmailResult,
 )
 
@@ -29,8 +35,11 @@ __all__ = [
     "ApiError",
     "AsyncMailGlyph",
     "AuthenticationError",
+    "BulkEmailValidationJob",
+    "BulkEmailValidationJobsPage",
     "Campaign",
     "Contact",
+    "DeleteBulkEmailValidationResult",
     "FilterCondition",
     "FilterGroup",
     "MailGlyph",
@@ -46,6 +55,9 @@ __all__ = [
     "Template",
     "TrackEventResult",
     "ValidationError",
+    "VerificationCreditLedgerEntry",
+    "VerificationCreditLedgerPage",
+    "VerificationCreditSummary",
     "VerifyEmailResult",
     "__version__",
 ]

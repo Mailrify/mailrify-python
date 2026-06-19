@@ -8,12 +8,14 @@ from .resources import (
     AsyncEventsResource,
     AsyncSegmentsResource,
     AsyncTemplatesResource,
+    AsyncVerificationResource,
     CampaignsResource,
     ContactsResource,
     EmailsResource,
     EventsResource,
     SegmentsResource,
     TemplatesResource,
+    VerificationResource,
 )
 
 
@@ -38,6 +40,7 @@ class MailGlyph:
         self.campaigns = CampaignsResource(self._http_client)
         self.segments = SegmentsResource(self._http_client)
         self.templates = TemplatesResource(self._http_client)
+        self.verification = VerificationResource(self._http_client)
 
     def close(self) -> None:
         self._http_client.close()
@@ -70,6 +73,7 @@ class AsyncMailGlyph:
         self.campaigns = AsyncCampaignsResource(self._http_client)
         self.segments = AsyncSegmentsResource(self._http_client)
         self.templates = AsyncTemplatesResource(self._http_client)
+        self.verification = AsyncVerificationResource(self._http_client)
 
     async def close(self) -> None:
         await self._http_client.aclose()

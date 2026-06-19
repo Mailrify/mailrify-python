@@ -27,17 +27,78 @@ class SendEmailResult(MailGlyphModel):
 class VerifyEmailResult(MailGlyphModel):
     email: str
     valid: bool
+    validation_method: str | None = Field(default=None, alias="validationMethod")
+    smtp_status: str | None = Field(default=None, alias="smtpStatus")
+    smtp_diagnosis: str | None = Field(default=None, alias="smtpDiagnosis")
     is_disposable: bool = Field(alias="isDisposable")
     is_alias: bool = Field(alias="isAlias")
     is_typo: bool = Field(alias="isTypo")
     is_plus_addressed: bool = Field(alias="isPlusAddressed")
     is_random_input: bool = Field(alias="isRandomInput")
     is_personal_email: bool = Field(alias="isPersonalEmail")
+    is_catch_all: bool | None = Field(default=None, alias="isCatchAll")
+    is_greylisted: bool | None = Field(default=None, alias="isGreylisted")
     domain_exists: bool = Field(alias="domainExists")
     has_website: bool = Field(alias="hasWebsite")
     has_mx_records: bool = Field(alias="hasMxRecords")
     suggested_email: str | None = Field(default=None, alias="suggestedEmail")
     reasons: list[str] = Field(default_factory=list)
+    credits_consumed: int | None = Field(default=None, alias="creditsConsumed")
+
+
+class BulkEmailValidationJob(MailGlyphModel):
+    id: str
+    status: str
+    original_filename: str = Field(alias="originalFilename")
+    file_size_bytes: int = Field(alias="fileSizeBytes")
+    local_email_count: int = Field(alias="localEmailCount")
+    reserved_credits: int = Field(alias="reservedCredits")
+    confirmed_email_count: int | None = Field(default=None, alias="confirmedEmailCount")
+    credit_used: int | None = Field(default=None, alias="creditUsed")
+    valid: int
+    invalid: int
+    unknown: int
+    catchall: int
+    duplicates: int
+    spam_trap: int = Field(alias="spamTrap")
+    toxic_domains: int = Field(alias="toxicDomains")
+    ready_for_download: bool = Field(alias="readyForDownload")
+    error_code: str | None = Field(default=None, alias="errorCode")
+    error_message: str | None = Field(default=None, alias="errorMessage")
+    last_validation_status: str | None = Field(default=None, alias="lastValidationStatus")
+    created_at: str = Field(alias="createdAt")
+    updated_at: str = Field(alias="updatedAt")
+    completed_at: str | None = Field(default=None, alias="completedAt")
+
+
+class BulkEmailValidationJobsPage(MailGlyphModel):
+    items: list[BulkEmailValidationJob] = Field(default_factory=list)
+    next_cursor: str | None = Field(default=None, alias="nextCursor")
+
+
+class DeleteBulkEmailValidationResult(MailGlyphModel):
+    refunded_credits: int = Field(alias="refundedCredits")
+
+
+class VerificationCreditSummary(MailGlyphModel):
+    balance: int
+    low_credits: bool = Field(alias="lowCredits")
+
+
+class VerificationCreditLedgerEntry(MailGlyphModel):
+    id: str
+    seq: int
+    type: str
+    credits_delta: int = Field(alias="creditsDelta")
+    balance_after: int = Field(alias="balanceAfter")
+    source: str | None = None
+    status: str | None = None
+    created_at: str = Field(alias="createdAt")
+
+
+class VerificationCreditLedgerPage(MailGlyphModel):
+    items: list[VerificationCreditLedgerEntry] = Field(default_factory=list)
+    next_cursor: str | None = Field(default=None, alias="nextCursor")
 
 
 class TrackEventResult(MailGlyphModel):

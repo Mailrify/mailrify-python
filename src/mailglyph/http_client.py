@@ -38,7 +38,6 @@ class HttpClient:
         self._key_type = self._detect_key_type(api_key)
         headers = {
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
             "User-Agent": f"mailglyph-python/{__version__}",
         }
         self._sync_client = httpx.Client(
@@ -75,9 +74,18 @@ class HttpClient:
         *,
         params: dict[str, Any] | None = None,
         json_body: dict[str, Any] | None = None,
+        files: Any | None = None,
+        expect_bytes: bool = False,
     ) -> Any:
         self._enforce_key_restrictions(path)
-        return self._request_with_retries(method, path, params=params, json_body=json_body)
+        return self._request_with_retries(
+            method,
+            path,
+            params=params,
+            json_body=json_body,
+            files=files,
+            expect_bytes=expect_bytes,
+        )
 
     async def arequest(
         self,
@@ -86,9 +94,18 @@ class HttpClient:
         *,
         params: dict[str, Any] | None = None,
         json_body: dict[str, Any] | None = None,
+        files: Any | None = None,
+        expect_bytes: bool = False,
     ) -> Any:
         self._enforce_key_restrictions(path)
-        return await self._arequest_with_retries(method, path, params=params, json_body=json_body)
+        return await self._arequest_with_retries(
+            method,
+            path,
+            params=params,
+            json_body=json_body,
+            files=files,
+            expect_bytes=expect_bytes,
+        )
 
     def _request_with_retries(
         self,
@@ -97,10 +114,19 @@ class HttpClient:
         *,
         params: dict[str, Any] | None,
         json_body: dict[str, Any] | None,
+        files: Any | None,
+        expect_bytes: bool,
     ) -> Any:
         for attempt in range(self._max_retries + 1):
             try:
-                response = self._sync_client.request(method, path, params=params, json=json_body)
+                response = self._sync_client.request(
+                    method,
+                    path,
+                    params=params,
+                    json=json_body,
+                    files=files,
+                    headers=self._request_headers(json_body=json_body, files=files),
+                )
             except httpx.TransportError as exc:
                 if attempt >= self._max_retries:
                     raise ApiError(f"Request failed: {exc}") from exc
@@ -111,7 +137,7 @@ class HttpClient:
                 time.sleep(self._retry_delay(attempt, response.headers.get("Retry-After")))
                 continue
 
-            return self._parse_response(response)
+            return self._parse_response(response, expect_bytes=expect_bytes)
 
         raise ApiError("Request retries exhausted.")
 
@@ -122,11 +148,18 @@ class HttpClient:
         *,
         params: dict[str, Any] | None,
         json_body: dict[str, Any] | None,
+        files: Any | None,
+        expect_bytes: bool,
     ) -> Any:
         for attempt in range(self._max_retries + 1):
             try:
                 response = await self._async_client.request(
-                    method, path, params=params, json=json_body
+                    method,
+                    path,
+                    params=params,
+                    json=json_body,
+                    files=files,
+                    headers=self._request_headers(json_body=json_body, files=files),
                 )
             except httpx.TransportError as exc:
                 if attempt >= self._max_retries:
@@ -138,7 +171,7 @@ class HttpClient:
                 await asyncio.sleep(self._retry_delay(attempt, response.headers.get("Retry-After")))
                 continue
 
-            return self._parse_response(response)
+            return self._parse_response(response, expect_bytes=expect_bytes)
 
         raise ApiError("Request retries exhausted.")
 
@@ -157,7 +190,13 @@ class HttpClient:
         jitter = random.uniform(0.0, 0.2)
         return base + jitter
 
-    def _parse_response(self, response: httpx.Response) -> Any:
+    @staticmethod
+    def _request_headers(*, json_body: dict[str, Any] | None, files: Any | None) -> dict[str, str]:
+        if json_body is not None and files is None:
+            return {"Content-Type": "application/json"}
+        return {}
+
+    def _parse_response(self, response: httpx.Response, *, expect_bytes: bool = False) -> Any:
         if response.status_code >= 400:
             self._raise_for_status(response)
 
@@ -166,6 +205,9 @@ class HttpClient:
 
         if not response.content:
             return None
+
+        if expect_bytes:
+            return response.content
 
         try:
             return response.json()

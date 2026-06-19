@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import os
 import time
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Callable, TypeVar
 
 import pytest
@@ -72,11 +74,97 @@ def test_local_mailglyph_api_integration_flow() -> None:
 
         verify_result = _run_step(
             "2) Email Verify (sk_*)",
-            lambda: sk_client.emails.verify("test@mailglyph.com"),
+            lambda: sk_client.verification.validate("test@mailglyph.com"),
         )
         assert verify_result.email == "test@mailglyph.com", (
             "[2) Email Verify (sk_*)] Verified email did not match input"
         )
+        assert verify_result.credits_consumed is None or verify_result.credits_consumed <= 1, (
+            "[2) Email Verify (sk_*)] Unexpected credit consumption"
+        )
+
+        credit_usage = _run_step(
+            "2.1) Verification Credits Usage",
+            sk_client.verification.credits,
+        )
+        assert credit_usage.balance >= 0, "[2.1) Verification Credits Usage] Negative balance"
+
+        credit_ledger = _run_step(
+            "2.2) Verification Credits Ledger",
+            lambda: sk_client.verification.credit_ledger(limit=5),
+        )
+        assert isinstance(credit_ledger.items, list), (
+            "[2.2) Verification Credits Ledger] Expected list response"
+        )
+
+        with TemporaryDirectory() as tmp_dir:
+            bulk_file = Path(tmp_dir) / "sdk-validation-emails.txt"
+            bulk_file.write_text(
+                "bulk-one@mailglyph.com\nbulk-two@mailglyph.com\n",
+                encoding="utf-8",
+            )
+            bulk_job = _run_step(
+                "2.3) Bulk Verification Create",
+                lambda: sk_client.verification.create_bulk(
+                    bulk_file,
+                    content_type="text/plain",
+                ),
+            )
+            assert bulk_job.local_email_count <= 3, (
+                "[2.3) Bulk Verification Create] Expected small test file"
+            )
+
+            listed_bulk_jobs = _run_step(
+                "2.4) Bulk Verification List",
+                lambda: sk_client.verification.list_bulk(limit=10, search="sdk-validation-emails"),
+            )
+            assert isinstance(listed_bulk_jobs.items, list), (
+                "[2.4) Bulk Verification List] Expected list response"
+            )
+
+            fetched_bulk_job = _run_step(
+                "2.5) Bulk Verification Get",
+                lambda: sk_client.verification.get_bulk(bulk_job.id),
+            )
+            assert fetched_bulk_job.id == bulk_job.id, (
+                "[2.5) Bulk Verification Get] Job ID mismatch"
+            )
+
+            if fetched_bulk_job.status == "ACTION_REQUIRED":
+                fetched_bulk_job = _run_step(
+                    "2.6) Bulk Verification Continue",
+                    lambda: sk_client.verification.continue_bulk(bulk_job.id),
+                )
+
+            terminal_statuses = {"COMPLETED", "FAILED"}
+            for _ in range(12):
+                if fetched_bulk_job.status in terminal_statuses:
+                    break
+                time.sleep(5)
+                fetched_bulk_job = _run_step(
+                    "2.7) Bulk Verification Poll",
+                    lambda: sk_client.verification.get_bulk(bulk_job.id),
+                )
+
+            if fetched_bulk_job.ready_for_download:
+                download = _run_step(
+                    "2.8) Bulk Verification Download",
+                    lambda: sk_client.verification.download_bulk(
+                        bulk_job.id,
+                        filter="all",
+                        format="csv",
+                    ),
+                )
+                assert len(download) > 0, "[2.8) Bulk Verification Download] Empty file"
+
+            if fetched_bulk_job.status in terminal_statuses or fetched_bulk_job.status == "QUEUED":
+                deleted_bulk_job = _run_step(
+                    "2.9) Bulk Verification Delete",
+                    lambda: sk_client.verification.delete_bulk(bulk_job.id),
+                )
+                assert deleted_bulk_job.refunded_credits >= 0, (
+                    "[2.9) Bulk Verification Delete] Invalid refunded credit count"
+                )
 
         track_result = _run_step(
             "3) Events Track (pk_*)",

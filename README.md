@@ -61,8 +61,37 @@ opt_out_result = client.emails.send(
     text="",
 )
 
-verification = client.emails.verify("user@example.com")
-print(verification.valid, verification.is_random_input)
+verification = client.verification.validate("user@example.com")
+print(verification.valid, verification.smtp_status, verification.credits_consumed)
+```
+
+## Email Verification
+
+```python
+from mailglyph import MailGlyph
+
+client = MailGlyph("sk_your_api_key")
+
+result = client.verification.validate("user@example.com")
+print(result.valid, result.validation_method, result.smtp_status)
+
+bulk_job = client.verification.create_bulk(
+    "emails.txt",
+    content_type="text/plain",
+)
+
+jobs = client.verification.list_bulk(limit=20, status="COMPLETED")
+job = client.verification.get_bulk(bulk_job.id)
+
+if job.status == "ACTION_REQUIRED":
+    job = client.verification.continue_bulk(job.id)
+
+if job.ready_for_download:
+    csv_bytes = client.verification.download_bulk(job.id, filter="all", format="csv")
+
+deleted = client.verification.delete_bulk(job.id)
+credits = client.verification.credits()
+ledger = client.verification.credit_ledger(limit=25)
 ```
 
 ## Events
@@ -153,7 +182,7 @@ from mailglyph import AsyncMailGlyph
 
 async def main() -> None:
     async with AsyncMailGlyph("sk_your_api_key") as client:
-        verification = await client.emails.verify("user@example.com")
+        verification = await client.verification.validate("user@example.com")
         print(verification.valid)
 
 
